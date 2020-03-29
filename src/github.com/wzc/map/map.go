@@ -51,6 +51,20 @@ func (d Dictionary) Add(word, definition string) error {
 
 //Update 更新Dictionary的value
 func (d Dictionary) Update(word, definition string) error {
-	d[word] = definition
+	_, err := d.Search(word)
+
+	switch err {
+	case ErrorNotFound:
+		return ErrorWordNotExist
+	case nil:
+		d[word] = definition
+	default:
+		return err
+	}
 	return nil
+}
+
+//Delete 是Dictionary删除key的一种方法
+func (d Dictionary) Delete(word string) {
+	delete(d, word)
 }
