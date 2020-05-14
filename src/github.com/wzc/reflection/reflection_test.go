@@ -5,6 +5,16 @@ import (
 	"testing"
 )
 
+type Person struct {
+	Name    string
+	Profile Profile
+}
+
+type Profile struct {
+	Age  int
+	City string
+}
+
 func TestWalk(t *testing.T) {
 	cases := []struct {
 		Name          string
@@ -12,13 +22,12 @@ func TestWalk(t *testing.T) {
 		ExpectedCalls []string
 	}{
 		{
-			"Struct with two string fields",
-			struct {
-				Name string
-				City string
-				Age  int
-			}{"Chris", "Nanjing", 24},
-			[]string{"Chris", "Nanjing"},
+			"Maps",
+			map[string]string{
+				"1": "jiangsu",
+				"2": "henan",
+			},
+			[]string{"jiangsu", "henan"},
 		},
 	}
 
@@ -37,13 +46,38 @@ func TestWalk(t *testing.T) {
 }
 
 func walk(x interface{}, fn func(input string)) {
-	val := reflect.ValueOf(x)
+	val := getValue(x)
 
-	for i := 0; i < val.NumField(); i++ {
-		field := val.Field(i)
+	walkValue := func(value reflect.Value) {
+		walk(value.Interface(), fn)
+	}
 
-		if field.Kind() == reflect.String {
-			fn(field.String())
+	switch val.Kind() {
+	case reflect.String:
+		fn(val.String())
+	case reflect.Struct:
+		for i := 0; i < val.NumField(); i++ {
+			walkValue(val.Field(i))
+		}
+	case reflect.Slice, reflect.Array:
+		for i := 0; i < val.Len(); i++ {
+			walkValue(val.Index(i))
+		}
+	case reflect.Map:
+		for _, key := range val.MapKeys() {
+			walkValue(val.MapIndex(key))
 		}
 	}
+
+}
+
+func getValue(x interface{}) reflect.Value {
+	val := reflect.ValueOf(x)
+
+	if val.Kind() == reflect.Ptr {
+		//返回interface或指针的值， nil返回0
+		val = val.Elem()
+	}
+
+	return val
 }
