@@ -1,9 +1,26 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"os"
 	"reflect"
 )
+
+// Student student struct
+type Student struct {
+	name string
+	age  int
+}
+
+// Person
+type Person interface {
+	hello() string
+}
+
+func (stu *Student) hello(Person string) string {
+	return person
+}
 
 func main() {
 	str1 := "golang"
@@ -33,10 +50,60 @@ func main() {
 	p := &str // p指向str
 	*p = "javascript"
 	fmt.Println(str) //改变指针的值，也就改变了str
+
+	_, err := os.Open("this.txt")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	err3 := testError()
+	fmt.Println(err3)
+
+	stu := &Student{
+		name: "wzc",
+	}
+	stu2 := new(Student)
+	fmt.Println(stu)
+	fmt.Println(stu2)
+
+	testDefer()
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("msg: ", r)
+			fmt.Println("after defer")
+		}
+	}()
+	testPanic()
 }
 
 func addNminus(num1, num2 int) (add, minus int) {
 	add = num1 + num2
 	minus = num1 - num2
 	return
+}
+
+func testError() (err error) {
+	_, err2 := os.Open("this.txt")
+	if err2 != nil {
+		return errors.New("读取文件失败")
+	}
+	return nil
+}
+
+/*
+返回
+first
+defer2
+defer1
+*/
+func testDefer() {
+	defer fmt.Println("defer1")
+	defer fmt.Println("defer2")
+	fmt.Println("first")
+}
+
+func testPanic() {
+	fmt.Println("befor panic")
+	panic(300)
+	fmt.Println("after panic") // unreachable code
 }
