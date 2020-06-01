@@ -6,6 +6,7 @@ import (
 	"net/http"
 )
 
+// H is a simplified form
 type H map[string]interface{}
 
 // Context defines the context of gee
